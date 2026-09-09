@@ -13,16 +13,6 @@ hands — see `plan.md` §7 (human inputs) and §10 (backlog).
 - **`README.md`'s "Content model" section omits `content/abogados.php`** (O1). The signed-lawyer
   collection exists and is used by `partials/abogados.php`; the README's content-file table
   was never updated to list it.
-- **`templates/segment.php` never reads `$record['guides']`** (S5). `content/areas-ciudades.php`
-  already forwards `'guides' => $svc['guides']` into every área × ciudad record (pre-existing
-  code, not part of this phase's diff), and this phase populated that data on all 8 áreas, but
-  `templates/service.php` is the only template that renders a "Guía relacionada" band from it.
-  The 56 combo pages therefore carry the guide slug in their content record without ever
-  showing the band — confirmed on `/ciudades/luque/familia/` (guide data present, no band in
-  the rendered HTML). Fixing this needs one `<?php if ($record['guides'] ?? []) ... ?>` block
-  in `templates/segment.php`, mirroring the block already in `templates/service.php` — out of
-  this phase's owned paths (`templates/**` is hard-limited). The 8 área pages themselves show
-  the band correctly.
 - **Local `verify.sh` flakiness on this Windows/Git Bash machine** (S2, S3). A stray `php -S`
   process left bound to the fixed port from a prior run collides with the next run's own
   server, producing phantom `enviar.php` / metadata / lead-routing failures on pages the
