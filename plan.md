@@ -262,12 +262,8 @@ report as the artifact Anton uploads. Exit: verify green, zip built and verified
 - S2 Guías — `docs/log/S2.md`. 5 new guides added (penal, empresas, marcas, inmobiliario,
   tributario); all 8 áreas now have a guide; `related[]` fixed on all 8 so every guide links to
   two others that exist. PR #3 merged, CI green. Deviation: wrote all 5 new guides directly
-  instead of fanning 4 out to parallel subagents (see log).
-- S2 Guías — `docs/log/S2.md`. Added 5 guides (penal, empresas, marcas, inmobiliario, tributario)
-  to `content/guias.php`, one per remaining área — 8 total, 8/8 with valid `related[]`. Fixed one
-  invented-fact violation inherited from the previous session (unsourced SRL partner-count
-  statistic). CI `verify` green on PR and on merge commit; local Windows `verify.sh` re-runs
-  flaky/unrelated to owned files (see log). PR #3 merged to main.
+  instead of fanning 4 out to parallel subagents; a concurrent session ran the same phase and
+  produced a duplicate audit (PR #4) mid-run, reconciled into one log (see log).
 
 ## 10. Backlog
 
