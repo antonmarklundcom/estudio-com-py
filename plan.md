@@ -259,6 +259,10 @@ report as the artifact Anton uploads. Exit: verify green, zip built and verified
   Git Bash; city reaches the CRM as `ciudad`; `content/abogados.php` + `partials/abogados.php`
   replace the three empty-state blocks; `verify-live.sh` extended. Live site found returning 500
   on every URL — `dist/estudio-2026-09-09.zip` is the fix, waiting on Anton to upload.
+- S2 Guías — `docs/log/S2.md`. 5 new guides added (penal, empresas, marcas, inmobiliario,
+  tributario); all 8 áreas now have a guide; `related[]` fixed on all 8 so every guide links to
+  two others that exist. PR #3 merged, CI green. Deviation: wrote all 5 new guides directly
+  instead of fanning 4 out to parallel subagents (see log).
 - S2 Guías — `docs/log/S2.md`. Added 5 guides (penal, empresas, marcas, inmobiliario, tributario)
   to `content/guias.php`, one per remaining área — 8 total, 8/8 with valid `related[]`. Fixed one
   invented-fact violation inherited from the previous session (unsourced SRL partner-count
