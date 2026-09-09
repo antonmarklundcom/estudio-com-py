@@ -32,10 +32,41 @@ ok()    { printf '  ok    %s\n' "$*"; }
 
 FAILURES=0
 
+# Hostinger answers the first request from a new client with a JS anti-bot
+# challenge — 403, an HTML body, and a cookie. A browser user agent gets past it
+# most of the time; when it does not, one retry six seconds later does. Every
+# request in this script goes through these two helpers so a challenge is never
+# reported as a broken page.
+UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+JAR="$(mktemp)"
+trap 'rm -f "$JAR"' EXIT
+
+live_code() {   # live_code <path> — HTTP status, following no redirects
+  local code
+  code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15     -A "$UA" -b "$JAR" -c "$JAR" "${BASE}${1}")
+  if [ "$code" = "403" ] || [ "$code" = "000" ]; then
+    sleep 6
+    code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15       -A "$UA" -b "$JAR" -c "$JAR" "${BASE}${1}")
+  fi
+  printf '%s' "$code"
+}
+
+live_body() {   # live_body <path> — response body
+  local body
+  body=$(curl -s --max-time 15 -A "$UA" -b "$JAR" -c "$JAR" "${BASE}${1}")
+  if [ -z "$body" ]; then
+    sleep 6
+    body=$(curl -s --max-time 15 -A "$UA" -b "$JAR" -c "$JAR" "${BASE}${1}")
+  fi
+  printf '%s' "$body"
+}
+
+live_header() { # live_header <path> <header-name> — one response header, lower-cased
+  curl -sI --max-time 15 -A "$UA" -b "$JAR" -c "$JAR" "${BASE}${1}"     | tr -d '' | grep -i "^${2}:" | head -1 | cut -d' ' -f2- | tr 'A-Z' 'a-z'
+}
+
 step "reachability"
-if ! code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$BASE/"); then
-  red "could not reach $BASE — check DNS/hosting before continuing"; exit 2
-fi
+code=$(live_code /)
 if [ "$code" = "000" ]; then
   red "could not reach $BASE (connection failed) — check DNS/hosting before continuing"; exit 2
 fi
@@ -54,7 +85,7 @@ ROUTE_COUNT=0
 while IFS=$'\t' read -r path expected; do
   [ -z "$path" ] && continue
   ROUTE_COUNT=$((ROUTE_COUNT + 1))
-  actual=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "${BASE}${path}")
+  actual=$(live_code "$path")
   if [ "$actual" != "$expected" ]; then
     fail "$path — expected $expected, got $actual"
     ROUTE_FAILED=1
@@ -65,7 +96,7 @@ done <<< "$ROUTE_LIST"
 step "internals stay unreachable"
 INTERNAL_FAILED=0
 for path in /config.php /lib/helpers.php /content/site.php /logs/leads.log /.htaccess /deploy/make-zip.sh; do
-  actual=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "${BASE}${path}")
+  actual=$(live_code "$path")
   if [ "$actual" = "200" ]; then
     fail "$path is publicly readable (got 200) — check .htaccess made it to the server"
     INTERNAL_FAILED=1
@@ -74,25 +105,69 @@ done
 [ "$INTERNAL_FAILED" -eq 0 ] && ok "internal paths are not served"
 
 step "sitemap and robots"
-sitemap=$(curl -s --max-time 10 "$BASE/sitemap.xml")
+sitemap=$(live_body /sitemap.xml)
 if echo "$sitemap" | grep -q "<urlset"; then
   ok "sitemap.xml renders"
 else
   fail "sitemap.xml did not return a <urlset> — is sitemap.php reachable and is SITE_URL set in config.php?"
 fi
-robots=$(curl -s --max-time 10 "$BASE/robots.txt")
+
+# 8 áreas + 7 cities + 56 combos + the static pages and guides is comfortably
+# over 80; a sitemap that suddenly lists fewer means a content array did not ship.
+SITEMAP_URLS=$(echo "$sitemap" | grep -c "<loc>")
+if [ "$SITEMAP_URLS" -ge 80 ]; then
+  ok "sitemap.xml lists $SITEMAP_URLS URLs"
+else
+  fail "sitemap.xml lists only $SITEMAP_URLS URLs, expected at least 80"
+fi
+
+robots=$(live_body /robots.txt)
 if echo "$robots" | grep -qi "sitemap"; then
   ok "robots.txt references the sitemap"
 else
   fail "robots.txt does not mention the sitemap"
 fi
 
-step "wp-sitemap.xml redirect (WordPress cutover)"
-wpcode=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$BASE/wp-sitemap.xml")
-if [ "$wpcode" = "301" ]; then
-  ok "/wp-sitemap.xml still redirects (301)"
+# Only for a site that actually replaced a WordPress install: the redirect is
+# commented out in .htaccess and absent from the route contract otherwise, and
+# asserting on it there would fail every run for no reason.
+if printf '%s' "$ROUTE_LIST" | grep -q '^/wp-sitemap\.xml'; then
+  step "wp-sitemap.xml redirect (WordPress cutover)"
+  wpcode=$(live_code /wp-sitemap.xml)
+  if [ "$wpcode" = "301" ]; then
+    ok "/wp-sitemap.xml still redirects (301)"
+  else
+    fail "/wp-sitemap.xml returned $wpcode, expected 301 — Search Console will flag this"
+  fi
+fi
+
+# The fonts were moved off the Google CDN on 2026-09-09 (self-hosted, subset,
+# preloaded). A CDN link creeping back costs a third-party connection on first
+# paint and leaks the visitor's IP to Google; a woff2 served as the wrong type is
+# a build that shipped the files but not the .htaccess.
+step "self-hosted fonts"
+home=$(live_body /)
+if printf '%s' "$home" | grep -q 'fonts\.googleapis\.com\|fonts\.gstatic\.com'; then
+  fail "the homepage still links the Google Fonts CDN"
 else
-  fail "/wp-sitemap.xml returned $wpcode, expected 301 — Search Console will flag this"
+  ok "no Google Fonts CDN reference in the HTML"
+fi
+
+FONT_FAILED=0
+FONT_COUNT=0
+while IFS= read -r font; do
+  [ -z "$font" ] && continue
+  FONT_COUNT=$((FONT_COUNT + 1))
+  ctype=$(live_header "/assets/fonts/${font}" content-type)
+  case "$ctype" in
+    font/woff2*) ;;
+    *) fail "/assets/fonts/${font} is served as \"${ctype:-nothing}\", expected font/woff2"; FONT_FAILED=1 ;;
+  esac
+done < <(cd "$ROOT/assets/fonts" 2>/dev/null && ls *.woff2 2>/dev/null)
+if [ "$FONT_COUNT" -eq 0 ]; then
+  fail "assets/fonts/ has no .woff2 files locally — nothing to check"
+elif [ "$FONT_FAILED" -eq 0 ]; then
+  ok "$FONT_COUNT woff2 files served as font/woff2"
 fi
 
 echo
