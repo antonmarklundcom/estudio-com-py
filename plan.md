@@ -272,6 +272,11 @@ report as the artifact Anton uploads. Exit: verify green, zip built and verified
   found nothing to fix. Deviation: wrote all 8 áreas directly instead of fanning 7 out to
   parallel subagents after the `laboral` exemplar (see log).
 
+- S3 Áreas depth — `docs/log/S3.md`. All 8 área records deepened (includes/excludes/weNeed,
+  two-part sections, 4 FAQs); 18 exclusions each naming the área that does cover it; depth
+  reaches the 56 combo pages through the generator. `areas-ciudades.php` needed no change.
+  PR #6 merged, CI green.
+
 ## 10. Backlog
 
 - Herramientas (calculators: liquidación laboral, pensión alimentaria orientativa) — template
