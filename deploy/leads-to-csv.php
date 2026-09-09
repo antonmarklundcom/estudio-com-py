@@ -53,7 +53,7 @@ if (!is_file($source) || !is_readable($source)) {
    column automatically, so this never needs editing when the payload grows. */
 const LEAD_CSV_LEADING = [
     'at', 'outcome', 'fields.valor', 'fields.servicio', 'fields.etiqueta',
-    'name', 'phone', 'email', 'fields.empresa', 'fields.necesita',
+    'name', 'phone', 'email', 'fields.ciudad', 'fields.necesita',
     'message', 'fields.resultado_herramienta', 'page_url', 'source',
 ];
 
