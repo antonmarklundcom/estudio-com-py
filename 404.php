@@ -45,5 +45,25 @@ require ROOT_DIR . '/partials/header.php';
       <p class="mt-4"><a href="/servicios/"><?= e(ui('nav.all_services')) ?> →</a></p>
     </div>
   </section>
+
+  <section class="section">
+    <div class="container">
+      <?php
+      /* The seven cities estudio.com.py derives consultations into. */
+      $gridCards = [];
+      foreach (content('segmentos') as $cityRecord) {
+          $gridCards[] = [
+              'title' => $cityRecord['navLabel'],
+              'text'  => $cityRecord['metaDescription'],
+              'path'  => $cityRecord['path'],
+              'links' => [],
+          ];
+      }
+      $gridNumbered = false;
+      require ROOT_DIR . '/partials/service-card-grid.php';
+      ?>
+      <p class="mt-4"><a href="/ciudades/"><?= e(ui('nav.cities')) ?> →</a></p>
+    </div>
+  </section>
 </main>
 <?php require ROOT_DIR . '/partials/footer.php'; ?>

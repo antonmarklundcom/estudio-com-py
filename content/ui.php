@@ -96,11 +96,13 @@ return [
                    . 'Cuenta su situación, y su ficha llega al abogado o los abogados '
                    . 'independientes de su área y su ciudad. Ellos son responsables de su propio '
                    . 'ejercicio profesional; nosotros no intervenimos en la consulta ni cobramos '
-                   . 'nada al usuario.',
+                   . 'nada al usuario. Si todavía no hay un abogado incorporado en su área y '
+                   . 'ciudad, su ficha queda registrada y le avisamos apenas se sume uno.',
         'credentials' => [
             'Su ficha se comparte solo con quien recibe su consulta',
             'Abogados independientes, responsables de su propio ejercicio',
             'El servicio es gratuito para usted: paga el abogado que recibe la derivación',
+            'Si nadie la toma todavía, su ficha queda registrada y le avisamos apenas se sume un abogado',
         ],
         'badge_note'     => 'de experiencia',
         'badge_fallback' => 'Servicio de derivación',
@@ -217,6 +219,8 @@ return [
             'Su ficha queda registrada.',
             'La derivamos al abogado independiente de su área y su ciudad.',
             'El abogado le responde directamente. Nosotros no intervenimos en la consulta.',
+            'Si todavía no hay un abogado incorporado en su área y ciudad, la ficha queda '
+                . 'registrada y le avisamos apenas se sume uno.',
         ],
     ],
 
