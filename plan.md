@@ -272,6 +272,14 @@ report as the artifact Anton uploads. Exit: verify green, zip built and verified
   found nothing to fix. Deviation: wrote all 8 áreas directly instead of fanning 7 out to
   parallel subagents after the `laboral` exemplar (see log).
 
+- S4 Pages & trust copy — `docs/log/S4.md`. `about`/`contact` keys in
+  `content/ui.php` and `/privacidad/`/`/terminos/` in `content/pages.php`
+  now answer the no-lawyer-yet case structurally (ficha stays registered,
+  visitor notified when one signs); `/terminos/` also adds "Sin garantía de
+  resultado"; `/privacidad/` adds a retention sentence; `404.php` now lists
+  all 7 cities alongside the áreas. PR #9 merged, CI green on the first
+  run. Gate-3 audit found nothing to fix.
+
 ## 10. Backlog
 
 - Herramientas (calculators: liquidación laboral, pensión alimentaria orientativa) — template
