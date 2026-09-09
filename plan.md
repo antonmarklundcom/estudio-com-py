@@ -280,6 +280,18 @@ report as the artifact Anton uploads. Exit: verify green, zip built and verified
   all 7 cities alongside the áreas. PR #9 merged, CI green on the first
   run. Gate-3 audit found nothing to fix.
 
+- S5 Link pass — `docs/log/S5.md`. All 8 áreas in `content/services.php` now
+  point `guides` at their matching guide from `content/guias.php`; the "Guía
+  relacionada" band confirmed rendering on all 8 área pages. Sitemap sanity
+  confirmed (86 = 7 pages + 8 áreas + 7 cities + 56 combos + 8 guides, all
+  200). New `KNOWN-ISSUES.md` promotes still-open items from O1/S2/S3 and
+  records one new finding: `templates/segment.php` never reads `guides`, so
+  the 56 combo pages carry the guide slug but never render the band — a
+  template change outside this phase's owned paths, documented rather than
+  fixed. PR #11 merged, CI green on the first run. Gate-3 audit found
+  nothing to fix. Zip built and verified: `dist/estudio-2026-09-09.zip`
+  (154 files, 256,893 bytes).
+
 ## 10. Backlog
 
 - Herramientas (calculators: liquidación laboral, pensión alimentaria orientativa) — template
