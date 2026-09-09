@@ -255,6 +255,11 @@ report as the artifact Anton uploads. Exit: verify green, zip built and verified
 
 (one line per phase, appended by the phase itself)
 
+- O1 Foundation & deploy — `docs/log/O1.md`. Repo created and CI green; `verify.sh` fixed for
+  Git Bash; city reaches the CRM as `ciudad`; `content/abogados.php` + `partials/abogados.php`
+  replace the three empty-state blocks; `verify-live.sh` extended. Live site found returning 500
+  on every URL — `dist/estudio-2026-09-09.zip` is the fix, waiting on Anton to upload.
+
 ## 10. Backlog
 
 - Herramientas (calculators: liquidación laboral, pensión alimentaria orientativa) — template
