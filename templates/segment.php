@@ -200,6 +200,30 @@ require ROOT_DIR . '/partials/header.php';
     </section>
   <?php endif; ?>
 
+  <!-- Guía relacionada: the generator already forwards the área's guides into
+       every área × ciudad record, so a combo page links the same how-to its
+       área page does. Bands alternate through $segBand, not a fixed modifier. -->
+  <?php $segGuides = $record['guides'] ?? []; ?>
+  <?php if ($segGuides !== []): ?>
+    <section class="section<?= $segBand++ % 2 ? ' section--surface' : '' ?>">
+      <div class="container">
+        <h2><?= e(ui('service.guides')) ?></h2>
+        <div class="grid grid--3 mt-4">
+          <?php foreach ($segGuides as $segGuideSlug): ?>
+            <?php $segGuide = content('guias')[$segGuideSlug] ?? null; ?>
+            <?php if ($segGuide === null): ?>
+              <?php continue; ?>
+            <?php endif; ?>
+            <a class="card card--link" href="<?= e($segGuide['path']) ?>">
+              <h3 class="card-title"><?= e($segGuide['navLabel']) ?></h3>
+              <p class="card__text"><?= e($segGuide['metaDescription']) ?></p>
+            </a>
+          <?php endforeach; ?>
+        </div>
+      </div>
+    </section>
+  <?php endif; ?>
+
   <?php if ($record['faq'] !== []): ?>
     <section class="section<?= $segBand++ % 2 ? ' section--surface' : '' ?>">
       <div class="container">
