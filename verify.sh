@@ -215,6 +215,13 @@ rm -f "$META"
 # ------------------------------------------------------------ 7. lead form ----
 step "enviar.php"
 
+# enviar.php rate-limits by IP (LEAD_RATE_MAX per LEAD_RATE_WINDOW) and keeps
+# the counter in logs/rate/, which outlives the run. Every POST below comes from
+# 127.0.0.1, so a second run inside the window — or an earlier run that died
+# before the cleanup at the end of this file — would trip the limit and fail the
+# lead checks for a reason that has nothing to do with the site. Start from zero.
+rm -rf "$SITE_ROOT/logs/rate"
+
 # Fixtures come from the content arrays, never from a slug typed in here: this
 # script has to keep working on a site that shares none of this template's
 # example content. FIXTURE_* is the first service in content/services.php.
