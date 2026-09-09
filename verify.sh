@@ -39,6 +39,29 @@ while [ $# -gt 0 ]; do
 done
 
 BASE="http://127.0.0.1:${PORT}"
+
+# Git Bash hands PHP a POSIX site root ("/c/Claude 1/…") that php.exe cannot
+# open. Arguments to a native binary are translated by MSYS (and by cygpath
+# below); code embedded in a `php -r` string is not. So every snippet that needs
+# the site root is written to a temp file and run as `php <file> <root> [args]`,
+# reading the root from $argv[1] — identical behaviour on Linux CI, where
+# winpath() is the identity.
+winpath() {
+  if command -v cygpath >/dev/null 2>&1; then cygpath -w "$1"; else printf '%s' "$1"; fi
+}
+
+# php_snippet [args…] <<'PHP' … PHP  — $argv[1] is the site root, args follow.
+php_snippet() {
+  local tmp status
+  tmp="$(mktemp)"
+  # `php <file>` only executes code inside a PHP tag; `php -r` did not need one.
+  { printf '<?php
+'; cat; } > "$tmp"
+  php "$(winpath "$tmp")" "$(winpath "$SITE_ROOT")" "$@"
+  status=$?
+  rm -f "$tmp"
+  return $status
+}
 LOG="$(mktemp)"
 FAILURES=0
 
@@ -67,8 +90,8 @@ done < <(find "$SITE_ROOT" -name '*.php' -not -path '*/tests/node_modules/*' -no
 
 # ---------------------------------------------------------- 2. market module --
 step "market module"
-market_out=$(php -r '
-require "'"$SITE_ROOT"'/lib/bootstrap.php";
+market_out=$(php_snippet 2>&1 <<'PHP'
+require rtrim($argv[1], "/\\") . "/lib/bootstrap.php";
 $fail = 0;
 $say  = function (string $m) use (&$fail) { echo $m, "\n"; $fail = 1; };
 
@@ -107,7 +130,8 @@ if ($id !== null) {
         && $say("validate_tax_id() accepted a bad check digit");
 }
 exit($fail);
-' 2>&1)
+PHP
+)
 if [ -z "$market_out" ]; then
   ok "every lib/market/*.php implements the contract; the selected one works"
 else
@@ -194,15 +218,16 @@ step "enviar.php"
 # Fixtures come from the content arrays, never from a slug typed in here: this
 # script has to keep working on a site that shares none of this template's
 # example content. FIXTURE_* is the first service in content/services.php.
-eval "$(php -r '
-require "'"$SITE_ROOT"'/lib/bootstrap.php";
+eval "$(php_snippet <<'PHP'
+require rtrim($argv[1], "/\\") . "/lib/bootstrap.php";
 $slug = (string) array_key_first(services());
 $lead = lead_value($slug);
 printf("FIXTURE_SLUG=%s\nFIXTURE_PATH=%s\nFIXTURE_TIER=%s\nFIXTURE_VALUE=%d\nFIXTURE_CURRENCY=%s\nFIXTURE_NEED=%s\n",
     escapeshellarg($slug), escapeshellarg(services($slug)["path"]), escapeshellarg((string) $lead["tier"]),
     lead_tier_value((string) $lead["tier"]), escapeshellarg(market_currency()),
     escapeshellarg((string) array_key_first(content("ui")["needs"])));
-')"
+PHP
+)"
 
 # The JSON response carries the resolved lead value, so these
 # assert on the fields rather than on the whole body.
@@ -254,8 +279,8 @@ step "lead value routing"
 # tool, a guide or a segment page adds a slug here too, and the failure mode
 # without this check is silent — the page just quietly becomes a tier-C
 # "neutral default" lead.
-model_out=$(php -r '
-require "'"$SITE_ROOT"'/lib/bootstrap.php";
+model_out=$(php_snippet 2>&1 <<'PHP'
+require rtrim($argv[1], "/\\") . "/lib/bootstrap.php";
 $model = content("lead-values");
 $fail  = 0;
 $say   = function (string $m) use (&$fail) { echo $m, "\n"; $fail = 1; };
@@ -296,7 +321,8 @@ foreach (array_keys(content("ui")["needs"]) as $need) {
     isset($model["needs"][$need]) || $say("form chip {$need} has no tier in lead-values");
 }
 exit($fail);
-' 2>&1)
+PHP
+)
 if [ -z "$model_out" ]; then
   ok "content/lead-values.php covers every service, tool and chip"
 else
@@ -344,18 +370,20 @@ while IFS=$'\t' read -r slug path; do
     fail "$path — form has no name=\"service\" value=\"$slug\""
     missing_service_field=1
   fi
-done < <(php -r '
-  require "'"$SITE_ROOT"'/lib/bootstrap.php";
+done < <(php_snippet <<'PHP'
+  require rtrim($argv[1], "/\\") . "/lib/bootstrap.php";
   foreach (services() as $slug => $service) { echo $slug, "\t", $service["path"], "\n"; }
-')
+PHP
+)
 [ "$missing_service_field" -eq 0 ] && ok "every service page posts its own slug"
 
 # The per-service thank-you the no-JS redirect lands on.
 thanks=$(curl -s "${BASE}/contacto/?enviado=1&s=${FIXTURE_SLUG}")
-expected_step=$(php -r '
-  require "'"$SITE_ROOT"'/lib/bootstrap.php";
-  echo htmlspecialchars(lead_value($argv[1])["nextStep"][0], ENT_QUOTES | ENT_SUBSTITUTE, "UTF-8");
-' "$FIXTURE_SLUG")
+expected_step=$(php_snippet "$FIXTURE_SLUG" <<'PHP'
+  require rtrim($argv[1], "/\\") . "/lib/bootstrap.php";
+  echo htmlspecialchars(lead_value($argv[2])["nextStep"][0], ENT_QUOTES | ENT_SUBSTITUTE, "UTF-8");
+PHP
+)
 if printf '%s' "$thanks" | grep -qF "$expected_step"; then
   ok "/contacto/?enviado=1&s=${FIXTURE_SLUG} renders that service's next step"
 else
@@ -392,8 +420,8 @@ rm -rf "$SITE_ROOT/logs/rate" "$SITE_ROOT/logs/leads.log"
 # least one article and one guide") adds the two count() assertions below; the
 # template ships without them so an early phase with no blog yet still passes.
 step "content integrity"
-links_out=$(php -r '
-require "'"$SITE_ROOT"'/lib/bootstrap.php";
+links_out=$(php_snippet 2>&1 <<'PHP'
+require rtrim($argv[1], "/\\") . "/lib/bootstrap.php";
 $fail = 0;
 $say  = function (string $m) use (&$fail) { echo $m, "\n"; $fail = 1; };
 
@@ -446,7 +474,8 @@ foreach (array_keys(content("pages")) as $path) {
         || $say("page {$path}: no route file at " . rtrim($path, "/") . "/index.php");
 }
 exit($fail);
-' 2>&1)
+PHP
+)
 if [ -z "$links_out" ]; then
   ok "every slug the content arrays point at exists, and every page has a route file"
 else
