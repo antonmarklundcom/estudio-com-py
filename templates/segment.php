@@ -222,12 +222,15 @@ require ROOT_DIR . '/partials/header.php';
             <li><span><?= e($segStep) ?></span></li>
           <?php endforeach; ?>
         </ul>
-        <!-- Honest empty state: no firm is signed in this city yet. Same block as
-             the homepage; becomes a real card when content/site.php lists one. -->
-        <div class="trust-empty">
-          <p class="trust-empty__label"><?= e(ui('segment.trust_empty_label')) ?></p>
-          <p class="trust-empty__text"><?= e(str_replace('{ciudad}', $segCityName, ui('segment.trust_empty'))) ?></p>
-        </div>
+        <!-- Quién recibe su consulta: the honest empty state until a lawyer
+             signs for this área in this city, that lawyer's card afterwards. -->
+        <?php
+        $abogadosScope    = 'segment';
+        $abogadosArea     = $segArea;
+        $abogadosCity     = $segCity;
+        $abogadosCityName = $segCityName;
+        require ROOT_DIR . '/partials/abogados.php';
+        ?>
       </div>
 
       <div>

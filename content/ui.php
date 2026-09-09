@@ -233,10 +233,8 @@ return [
         'articles'     => 'Guía relacionada',
         'form_eyebrow' => 'Consulta',
         'form_lead'    => 'Cuéntenos qué le pasó y lo conectamos con el abogado correcto, sin costo.',
-        /* Honest empty state next to the form while no firm is signed in this
-           área (mirrors the block on the homepage). */
-        'trust_empty_label' => 'Quién recibe su consulta',
-        'trust_empty'       => 'Estamos incorporando abogados independientes de esta área en Asunción y Gran Asunción. Su ficha queda registrada y le avisamos cuando uno la tome.',
+        /* The "quién recibe su consulta" copy lives in the `trust` group below:
+           one partial renders it on all three page kinds. */
         'breadcrumb'   => 'Ruta de navegación',
     ],
 
@@ -250,8 +248,32 @@ return [
         'other_areas_in_city' => 'Otras áreas en {ciudad}',
         'area_other_cities'   => '{area} en otras ciudades',
         'area_national'       => 'Ver {area} en todo Asunción y Gran Asunción →',
-        'trust_empty_label'   => 'Quién recibe su consulta',
-        'trust_empty'         => 'Estamos incorporando abogados independientes que atienden en {ciudad}. Su ficha queda registrada y le avisamos cuando un abogado de su área la tome.',
+    ],
+
+    /* "Quién recibe su consulta", rendered by partials/abogados.php on the home
+       trust band, on área pages and on área × ciudad pages. `label` heads the
+       block either way; `empty` is what it says while content/abogados.php is
+       still empty — three wordings because the home band speaks for the whole
+       site, the área page for that área and the city page for that city.
+       {firm} and {ciudad} are filled in by the partial. */
+    'trust' => [
+        'label' => [
+            'home'    => '{firm} — quién recibe su consulta',
+            'service' => 'Quién recibe su consulta',
+            'segment' => 'Quién recibe su consulta',
+        ],
+        'empty' => [
+            'home'    => 'Estamos incorporando abogados independientes en Asunción y Gran Asunción. Su ficha queda registrada y le avisamos cuando un abogado de su área la tome.',
+            'service' => 'Estamos incorporando abogados independientes de esta área en Asunción y Gran Asunción. Su ficha queda registrada y le avisamos cuando uno la tome.',
+            'segment' => 'Estamos incorporando abogados independientes que atienden en {ciudad}. Su ficha queda registrada y le avisamos cuando un abogado de su área la tome.',
+        ],
+    ],
+
+    /* Labels on a signed lawyer's card. The card itself carries nothing else:
+       no photo, no rating, no years of experience (plan §1.2). */
+    'abogados' => [
+        'areas'  => 'Áreas',
+        'cities' => 'Ciudades',
     ],
 
     'tools' => [
