@@ -289,11 +289,14 @@ require ROOT_DIR . '/partials/header.php';
             <li><span><?= e($svcStep) ?></span></li>
           <?php endforeach; ?>
         </ul>
-        <!-- Honest empty state: no firm is signed in this área yet (see index.php). -->
-        <div class="trust-empty">
-          <p class="trust-empty__label"><?= e(ui('service.trust_empty_label')) ?></p>
-          <p class="trust-empty__text"><?= e(ui('service.trust_empty')) ?></p>
-        </div>
+        <!-- Quién recibe su consulta: the honest empty state until a lawyer
+             signs for this área, that lawyer's card afterwards. -->
+        <?php
+        $abogadosScope = 'service';
+        $abogadosArea  = $slug;
+        $abogadosCity  = null;
+        require ROOT_DIR . '/partials/abogados.php';
+        ?>
       </div>
 
       <div>

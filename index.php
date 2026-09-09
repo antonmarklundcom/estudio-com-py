@@ -102,12 +102,13 @@ require ROOT_DIR . '/partials/header.php';
         <?php endforeach; ?>
       </div>
 
-      <div class="trust-empty mt-4">
-        <p class="trust-empty__label"><?= e(ui('nav.firm')) ?> — quién recibe su consulta</p>
-        <p class="trust-empty__text">
-          Estamos incorporando abogados independientes en Asunción y Gran Asunción. Su ficha
-          queda registrada y le avisamos cuando un abogado de su área la tome.
-        </p>
+      <div class="mt-4">
+        <?php
+        $abogadosScope = 'home';
+        $abogadosArea  = null;
+        $abogadosCity  = null;
+        require ROOT_DIR . '/partials/abogados.php';
+        ?>
       </div>
     </div>
   </section>

@@ -6,7 +6,8 @@
  *
  * Contract, consumed by partials/lead-form.php and by the tool pages:
  *
- *   POST fields: name, company?, phone (required), email?, need, message?,
+ *   POST fields: name, company? (the visitor's city on this site), phone
+ *   (required), email?, need, message?,
  *                source_page, form_id, idempotency_key, website (honeypot),
  *                service?, value_tier?, tool_result?,
  *                utm_source|utm_medium|utm_campaign|utm_term|utm_content,
@@ -195,7 +196,7 @@ function notify_by_email(array $payload, string $outcome): void
         'valor'                 => 'Tier',
         'servicio'              => 'Servicio',
         'necesita'              => 'Necesita',
-        'empresa'               => 'Empresa',
+        'ciudad'                => 'Ciudad',
         'resultado_herramienta' => 'Resultado de la herramienta',
         'etiqueta'              => 'Etiqueta',
         'formulario'            => 'Formulario',
@@ -318,7 +319,11 @@ foreach (['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
 $formId     = field('form_id', 60) ?: 'contacto';
 $sourcePage = field('source_page', 2000) ?: '/';
 $need       = field('need', 100);
-$company    = field('company', 200);
+/* The form input is still named `company` (the partial is shared with the
+   template's other markets), but on this site it is labelled "Ciudad" and
+   holds the visitor's city. It travels to the CRM as a city, never as a
+   company name. */
+$ciudad     = field('company', 200);
 
 /* A stable key so a double-click or a network retry replays the same lead
    instead of creating a duplicate. The form supplies one per render; the
@@ -349,7 +354,7 @@ $serviceLabel = $service !== ''
 
 $fields = array_filter([
     'necesita'              => $need !== '' ? lead_need_label($need) : '',
-    'empresa'               => $company,
+    'ciudad'                => $ciudad,
     'formulario'            => $formId,
     'servicio'              => $serviceLabel,
     'valor'                 => (string) $lead['tier'],
@@ -379,11 +384,19 @@ $leadResult = [
     ],
 ];
 
+/* The lead endpoint has no city or address field, so the city rides along
+   twice: as the `ciudad` custom field above (queryable on the timeline) and as
+   the first line of the message body, where whoever answers the lead reads it. */
+$message = field('message', 5000);
+if ($ciudad !== '') {
+    $message = mb_substr(rtrim('Ciudad: ' . $ciudad . "\n\n" . $message), 0, 5000);
+}
+
 $payload = array_filter([
     'phone'           => $phone,
     'name'            => field('name', 200),
     'email'           => $email,
-    'message'         => field('message', 5000),
+    'message'         => $message,
     'source'          => 'formulario-' . $formId,
     'page_url'        => str_starts_with($sourcePage, 'http') ? $sourcePage : url($sourcePage),
     'referrer'        => (string) ($attr['referrer'] ?? ''),
