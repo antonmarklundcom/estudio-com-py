@@ -113,6 +113,16 @@ return [
                 ],
             ],
             [
+                'h2'   => 'Cuánto tiempo conservamos sus datos',
+                'body' => [
+                    'Conservamos su ficha mientras exista la posibilidad de derivarla a un '
+                        . 'abogado de su área y su ciudad, y mientras haga falta para responder '
+                        . 'a consultas o reclamos sobre esa derivación. Puede pedir su '
+                        . 'eliminación en cualquier momento, aunque la consulta ya haya sido '
+                        . 'derivada.',
+                ],
+            ],
+            [
                 'h2'   => 'Sus derechos',
                 'body' => [
                     'Puede pedir el acceso, la corrección o la eliminación de sus datos '
@@ -155,6 +165,25 @@ return [
                     'El servicio es gratuito para el usuario. Los abogados receptores abonan por '
                         . 'la derivación; sus honorarios profesionales se acuerdan directamente con '
                         . 'cada uno.',
+                ],
+            ],
+            [
+                'h2'   => 'Qué hacemos con su consulta si ningún abogado la toma',
+                'body' => [
+                    'Si todavía no hay un abogado independiente incorporado en su área y su '
+                        . 'ciudad, su ficha queda registrada en lugar de descartarse. Le '
+                        . 'avisamos apenas un abogado de su área y su ciudad se incorpore y la '
+                        . 'tome. No le cobramos nada por ese tiempo de espera ni le garantizamos '
+                        . 'un plazo.',
+                ],
+            ],
+            [
+                'h2'   => 'Sin garantía de resultado',
+                'body' => [
+                    'Conectar su consulta con un abogado no garantiza que ese abogado la acepte, '
+                        . 'ni el resultado, el plazo o el costo de su caso. Cada abogado decide '
+                        . 'de forma independiente si toma o no una consulta, y esos términos se '
+                        . 'acuerdan directamente entre usted y el abogado.',
                 ],
             ],
         ],
