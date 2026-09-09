@@ -265,6 +265,13 @@ report as the artifact Anton uploads. Exit: verify green, zip built and verified
   instead of fanning 4 out to parallel subagents; a concurrent session ran the same phase and
   produced a duplicate audit (PR #4) mid-run, reconciled into one log (see log).
 
+- S3 Áreas depth — `docs/log/S3.md`. All 8 áreas in `content/services.php` deepened: 5–6
+  `includes`, 2–3 `excludes` (each naming which área does cover it), 3–4 `weNeed`, a two-part
+  "Qué hacer ahora"/"Qué esperar" section shape, 4 FAQs. No change needed to
+  `areas-ciudades.php`'s `$areas` table. PR #6 merged, CI green on the first run. Gate-3 audit
+  found nothing to fix. Deviation: wrote all 8 áreas directly instead of fanning 7 out to
+  parallel subagents after the `laboral` exemplar (see log).
+
 ## 10. Backlog
 
 - Herramientas (calculators: liquidación laboral, pensión alimentaria orientativa) — template
