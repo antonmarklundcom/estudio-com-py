@@ -54,9 +54,12 @@ $htmlLang    = $page['lang'] ?? market_locale();
 
 <!-- Self-hosted, subset webfonts (assets/fonts/, deploy/subset-fonts.sh).
      Preload only the two files the first paint needs: the body face and the
-     display face at the H1 weight; the rest arrive with the stylesheet. -->
-<link rel="preload" href="<?= e(asset('/assets/fonts/work-sans-latin.woff2')) ?>" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="<?= e(asset('/assets/fonts/spectral-800-latin.woff2')) ?>" as="font" type="font/woff2" crossorigin>
+     display face at the H1 weight; the rest arrive with the stylesheet.
+     Not run through asset(): its ?v= cache-bust would make this URL differ
+     from the plain url() the CSS below actually requests, so the browser
+     fetches the font twice instead of reusing the preloaded one. -->
+<link rel="preload" href="/assets/fonts/work-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/spectral-800-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="<?= e(asset('/assets/css/site.css')) ?>">
 
 <?php foreach (seo_jsonld($page) as $block): ?>
