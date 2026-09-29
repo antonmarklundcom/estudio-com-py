@@ -114,6 +114,7 @@ remove one.
 | `tools.php` | the calculators, keyed by slug | `templates/tool.php` |
 | `guias.php` | the how-to guides, keyed by slug | `templates/guide.php` |
 | `segmentos.php` | segment / rubro landing pages, keyed by slug | `templates/segment.php` |
+| `abogados.php` | the signed-lawyer collection (empty until a lawyer signs), keyed by slug: `name`, `areas[]`, `cities[]`, `since`, `note` | `partials/abogados.php` |
 | `blog.php` | the article index (bodies live in each article's route file) | `templates/article.php` |
 | `precios.php` | pricing plans | `precios/index.php` |
 | `lead-values.php` | the tier, WhatsApp prefill, thank-you and CRM tag of every lead source | `partials/lead-form.php`, `enviar.php` |
