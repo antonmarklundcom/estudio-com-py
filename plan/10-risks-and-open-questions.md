@@ -69,8 +69,8 @@ you reply with a correction. The numbers are stable because other files refer to
    S11 goes live.
    → *The existing company behind contador.com.py if its objeto social covers
    advertising/software services, otherwise a new EAS.* The RUC appears on invoices only.
-7. **Invoicing: your FacturaPY app or an invoicing API (Sifende, FactPy, BillPy, Kuentalo)?**
-   → *FacturaPY if it issues SIFEN documents through an API; otherwise FactPy or Sifende.*
+7. **Decided: manual billing.** No gateway integration or auto-debit on the site; you confirm
+   transfers in the admin and issue invoices yourself (FacturaPY or e-Kuatia'i).
 8. **Decided: prices.**
    - Profesional Gs 150.000/month, or Gs 1.500.000/year.
    - Fundador: the first 50 lawyers, Gs 600.000/year, locked.

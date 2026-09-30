@@ -12,7 +12,7 @@ Assumptions (all are editable `settings` or `plans` rows):
 | Model | Revenue fit | Legal risk (`05-legal.md` §1) | Payment friction in PY | Lawyer appeal | Verdict |
 |---|---|---|---|---|---|
 | Pay-per-lead | Scales with value delivered | **Highest.** The Colegio code bars "mediación de agentes o corredores" (art. 8) and fee-sharing with non-lawyers (art. 28). Per-lead pricing looks like a paid corredor | Many small charges at 2–3 % card fees, and QR/transfers have no auto-debit | Liked when leads are good, hated when they're fake (disputes) | **Not in v1.** Revisit only after a written legal opinion |
-| Subscription with lead quotas | Predictable | Medium: a quota is per-lead pricing by another name | Monthly auto-debit exists (uPay) | Good | Rejected in favour of the next row |
+| Subscription with lead quotas | Predictable | Medium: a quota is per-lead pricing by another name | One monthly or annual payment | Good | Rejected in favour of the next row |
 | **Subscription, cases included (fair use), no per-case price** | Predictable MRR | **Lowest.** It is a flat fee for advertising and a software tool, unrelated to any client or fee | One monthly charge | "Sin comisión, sin pago por consulta" is a strong sales line | **Recommended core** |
 | Featured listing (sponsored slot) | Add-on, capped by pages | Low if clearly labelled "Patrocinado" and never mixed into the ranked shortlist | Monthly | Appeals to established firms | **Recommended add-on** |
 | Hybrid (all of the above) | Max revenue | Inherits pay-per-lead risk | Complex | Confusing | No |
@@ -78,13 +78,11 @@ directory credible in its first year.
 | Sponsored slots | 10 × 150k | **1.5 M** |
 | **Revenue** | | **≈ 8.5 M (≈ USD 1,160)** |
 | Google Ads | steady state | 3.0 M |
-| Card/QR fees | ~2.5 % | 0.2 M |
 | Claude API | ~800 intakes × ~USD 0.015 | 0.1 M |
-| SIFEN invoicing provider | from ~Gs 85k | 0.1 M |
 | R2, Cloudflare, Hostinger slot | mostly already paid | 0.1 M |
 | Part-time verifier/admin (10 h/week) | | 1.5 M |
-| **Costs** | | **≈ 5.0 M** |
-| **Contribution** | | **≈ 3.5 M/month (≈ USD 480)** before your time |
+| **Costs** | | **≈ 4.7 M** |
+| **Contribution** | | **≈ 3.8 M/month (≈ USD 520)** before your time |
 
 **Lead economics:**
 - At a CPC of Gs 3–7k and a 5–8 % intake conversion, one paid-ads lead costs **Gs 40–140k**.
@@ -98,7 +96,7 @@ directory credible in its first year.
 - Founders are close to free supply; the money comes from standard Profesional after the founder
   cap, plus sponsored slots (which now cost the same as a month of Profesional and are the
   highest-margin line).
-- Founders alone (Gs 2.5 M) cover the non-ad costs (Gs 2.0 M). With the full Ads budget,
+- Founders alone (Gs 2.5 M) cover the non-ad costs (Gs 1.7 M). With the full Ads budget,
   cash break-even is about 17 standard payers on top of the founders, fewer with sponsored
   slots. It becomes a meaningful business at 150+ standard payers (≈ Gs 25 M/month).
 - Churn is the key risk: track "accepted cases per paying lawyer per month" as the north-star
@@ -113,25 +111,26 @@ directory credible in its first year.
 - Cost per accepted assignment (target ≤ Gs 50k)
 - Share of cases "sin cobertura" per cell
 
-## 6. Payments: what exists and what you set up
+## 6. Payments: manual billing (decided 2026-09-30)
 
-| Option | Use | Notes |
-|---|---|---|
-| **uPay (ex-Pagopar, ueno)** | **Primary.** Monthly/annual subscription with card-on-file auto-debit + retries, plus one-off links | Needs RUC certificate + cédula, merchant verification. Reported fees about 2 % debit / 3 % credit (BCP cap since 2026-07-01), T+1/T+2 settlement. API + webhooks. **Get the current price list in writing.** Invoicing not included |
-| Bancard QR / vPOS | Optional second rail | QR is about 65–70 % of electronic payments. vPOS supports tokens; recurring use is to be confirmed with Bancard. Needs a Bancard merchant account |
-| Bank transfer (SIP, instant, 24/7) | Annual plans, larger firms | No fee. Manual confirmation in admin with a reference code `EST-<lawyerId>-<period>` |
-| AdamsPay | Fallback gateway if uPay onboarding stalls | Gs 49–199k/month plans. Recurring cards not confirmed |
-| Stripe, PayPal, Mercado Pago | — | Not available to a Paraguayan merchant |
+No payment gateway integration and no automatic billing on the site. At this volume (tens of
+lawyers, mostly annual founders) it isn't worth the integration, the merchant onboarding or the
+card fees.
 
-**Invoicing:** every paid payment triggers a SIFEN electronic invoice through an invoicing API
-(Sifende, FactPy, BillPy or Kuentalo, from about Gs 85k/month), or through your own FacturaPY app
-if it issues SIFEN documents. That choice is question 7. No gateway was found that issues the
-invoice itself.
+**How it works:**
+1. The lawyer picks a plan in the panel and sees your bank details (only inside the panel) and a
+   reference code `EST-<lawyerId>-<periodo>`. Instant SIP transfers are free, 24/7.
+2. Optional: a payment link you create by hand in a gateway dashboard (uPay, Bancard QR) for
+   lawyers who prefer card/QR. The site only stores the URL; no API.
+3. The lawyer clicks "Ya pagué" (optional receipt upload). You see it in admin → Pagos, check your
+   bank, click **Confirmar**. That sets `paid_until` (+1 month or +1 year) and logs who confirmed.
+4. You issue the SIFEN invoice yourself (FacturaPY or e-Kuatia'i) and type its number into the
+   payment row. The RUC appears there, not on the site.
+5. The site emails reminders 7 days and 1 day before `paid_until`. After a 7-day grace period
+   routing turns off automatically; the profile stays listed.
 
-**What only you can do** (blockers, see `09-phases.md` P4):
-1. Choose the legal entity that sells the plans: a new EAS, or the company behind
-   contador.com.py. You need a RUC, a bank account, and the site-identity details the e-commerce
-   law requires.
-2. Open the uPay merchant account (documents above) and get API keys.
-3. Enable SIFEN e-invoicing for that RUC and choose the invoicing provider.
-4. Have an accountant confirm the IVA/IRE treatment of subscriptions and sponsored slots.
+**Revisit** a gateway (uPay subscription links, the best option found) only if manual
+confirmations take you more than about an hour a week.
+
+**What only you do:** choose the entity whose bank account receives the money (question 6), put
+the bank details into admin settings, issue invoices, and ask the accountant about IVA/IRE.

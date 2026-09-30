@@ -38,10 +38,11 @@ subscription.
   per-lead price, no commission** (decided).
 - **Fundador:** the first 50 lawyers pay Gs 600.000/year, locked.
 - Labelled sponsored slot: Gs 150.000/month per page.
-- Payments through uPay (ex-Pagopar) with auto-debit, plus bank transfer. SIFEN invoices through
-  an API.
+- **Billing is manual (decided):** the lawyer pays by bank transfer (or a payment link you make by
+  hand), you mark it paid in the admin, and the plan runs until its paid-until date. No gateway
+  integration, no auto-debit. You issue the SIFEN invoices yourself (FacturaPY / e-Kuatia'i).
 - Scenario at month 12: 50 founders + 30 standard + 10 sponsored slots ≈ Gs 8.5 M/month revenue,
-  ≈ Gs 3.5 M contribution. At these prices paid ads lose money per lawyer served, so organic
+  ≈ Gs 3.8 M contribution. At these prices paid ads lose money per lawyer served, so organic
   content is the business.
 - Every form posts to VenderCRM server-side. There is no RUC on the site (decided).
 
@@ -76,7 +77,7 @@ never Codex.
 **Still open** (`10` §C):
 - 4: hire a Paraguayan lawyer now.
 - 6: which entity sells the plans (needed before S11 goes live).
-- 7: invoicing provider.
+- 7: decided: invoices issued by hand, no integration.
 - 20: connect the keyword-library MCP before S5.
 
 ## 2. Files
