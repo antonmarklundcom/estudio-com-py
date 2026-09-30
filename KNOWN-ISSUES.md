@@ -10,9 +10,6 @@ hands — see `plan.md` §7 (human inputs) and §10 (backlog).
 - **No `.gitattributes`** (O1). A clone made with `core.autocrlf=true` gets CRLF shell
   scripts again, which broke `verify.sh`'s heredocs once already. Add one pinning `*.sh` and
   the GitHub workflow files to LF.
-- **`README.md`'s "Content model" section omits `content/abogados.php`** (O1). The signed-lawyer
-  collection exists and is used by `partials/abogados.php`; the README's content-file table
-  was never updated to list it.
 - **Local `verify.sh` flakiness on this Windows/Git Bash machine** (S2, S3). A stray `php -S`
   process left bound to the fixed port from a prior run collides with the next run's own
   server, producing phantom `enviar.php` / metadata / lead-routing failures on pages the
