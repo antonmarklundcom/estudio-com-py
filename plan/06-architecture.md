@@ -33,7 +33,7 @@ src/
                             /para-abogados/**, /privacidad, /terminos, /contacto, /en/**, /pt/**
     (lawyer)/panel/**       lawyer dashboard (auth: lawyer)
     admin/**                admin (auth: admin|editor, TOTP)
-    api/                    webhooks/upay, push/subscribe, cron/tick, intake/*, uploads/*
+    api/                    push/subscribe, cron/tick, intake/*, uploads/*
     sitemap.ts robots.ts
   db/  schema.ts  index.ts  relations.ts
   lib/
@@ -44,7 +44,7 @@ src/
     intake/      questionSets.ts (loads content/intake/*.json), redact.ts, urgency.ts
     notify/      outbox.ts, email.ts (Cloudflare), webpush.ts (VAPID, `web-push`)
     crm/         vendercrm.ts (per `vendercrm-lead-capture` references/nextjs.md)
-    pay/         upay.ts, transfer.ts, invoices.ts
+    billing/     periods.ts (paid_until, grace, reminders), confirm.ts (admin confirmation)
     storage/     r2.ts (S3 client, signed URLs), images.ts (sharp → AVIF/WebP)
     security/    crypto.ts (AES-256-GCM + HMAC lookup), ratelimit.ts, turnstile.ts, audit.ts
     seo/         meta.ts, jsonld.ts, indexability.ts
@@ -102,11 +102,10 @@ dedupe and lookup without decrypting). Enum values are listed in full so P0 writ
 | `contact_clicks` | id, lawyer_id, page_path, session_hash, created_at |
 | `reviews` | id, assignment_id (uniq), lawyer_id, token_hash, rating_atencion, rating_claridad, body, status enum(invited,submitted,published,rejected), lawyer_reply, lawyer_replied_at, moderated_by, moderated_at, rejection_reason, invited_at, submitted_at |
 | `plans` | id, code (uniq), name, price_gs_month, price_gs_year, routing bool, max_principal, max_secondary, max_cities, fair_use_month, active |
-| `subscriptions` | id, lawyer_id, plan_id, status enum(founder,trialing,active,past_due,canceled,expired), period_start, period_end, cancel_at_period_end, provider enum(upay,transfer,manual), provider_ref, founder_until |
+| `subscriptions` | id, lawyer_id, plan_id, status enum(founder_free,active,grace,lapsed,canceled), paid_until, grace_until, billing_period enum(monthly,yearly), locked_price_gs, founder bool |
 | `sponsored_slots` | id, lawyer_id, specialty_id, city_id, starts_at, ends_at, status enum(active,paused,ended), price_gs — UNIQUE active per (specialty, city) |
-| `payments` | id, lawyer_id, subscription_id, sponsored_slot_id, amount_gs, method enum(tarjeta,qr,transferencia,otro), provider, provider_ref (uniq), status enum(pending,paid,failed,refunded), paid_at, confirmed_by, raw_json |
-| `invoices` | id, payment_id, number, sifen_cdc, pdf_key, issued_at, status enum(pending,issued,failed) |
-| `consents` | id, lead_id?, user_id?, kind enum(terms_privacy,share_with_lawyers,reassign,marketing,lawyer_terms), doc_version_hash, granted, ip_hash, created_at |
+| `payments` | id, lawyer_id, subscription_id, sponsored_slot_id, amount_gs, method enum(transferencia,link_manual,efectivo,otro), reference, receipt_key, status enum(reported,confirmed,rejected), reported_at, confirmed_by, confirmed_at, period_from, period_to, invoice_number |
+| `consents` | id, lead_id?, user_id?, kind enum(terms_privacy,share_with_lawyers,reassign,marketing,lawyer_terms,lawyer_public_phone), doc_version_hash, granted, ip_hash, created_at |
 | `abuse_reports` | id, reporter_type, reporter_ref, target_type, target_id, reason, body, status, handled_by |
 | `blocklist` | id, kind enum(phone_hash,ip_hash,email_hash), value, reason, expires_at |
 | `push_subscriptions` | id, user_id, endpoint (uniq), p256dh, auth, user_agent, created_at, last_ok_at, failed_count |
@@ -195,8 +194,7 @@ offers cron.
 | VenderCRM | **Every form posts to VenderCRM**, server-side via the outbox, never from the browser: intake (`source: consulta`), lawyer interest form (`para-abogados`), lawyer signup (`registro-abogado`), contact page (`contacto`). Endpoint `POST https://crm.clientes.com.py/api/v1/leads` (`VENDERCRM_URL` = the base URL), header `X-Api-Key` = the **estudio** site key from your VenderCRM Sitios list (hosting env only — never in the repo, never in client JS). Payload: `phone` (+595 format, the contact identity), `name`, `email` if given, `message` (a one-line label such as "Consulta laboral — Luque"), `source`, `idempotency_key` (a UUID generated when the form renders, so a double-click dedupes but a new submission never does), `fields {situacion, especialidad, ciudad, urgencia, lead_id}`, utm/gclid from the `vc_attr` cookie. **No free text or AI summary to the CRM** (data minimisation). One key for the whole site; if you later want lawyer prospects in a separate pipeline, create a second site in VenderCRM and set the optional `VENDERCRM_API_KEY_LAWYERS` | outbox row stays `failed` and retries; the visitor never sees an error |
 | Turnstile | intake step 5, lawyer signup, review form, login after 3 failures | block submit if the secret is set and verification fails; skip in dev |
 | R2 | `estudio-public` (lawyer photos, served via `img.estudio.com.py`), `estudio-private` (verification docs, signed URLs of 5 min) | uploads disabled with a message |
-| uPay (ex-Pagopar) | subscription links + webhook (`04-business-model.md` §6) | bank transfer + manual confirm |
-| SIFEN invoicing | provider API triggered by the paid-payment webhook | manual invoice, `invoices.status = pending` |
+| Billing | **manual** (`04` §6): transfer or hand-made payment link → lawyer clicks "Ya pagué" → admin confirms → `paid_until` set; invoices issued by you outside the app, number recorded | — |
 | GA4 + Google Ads | `lib/analytics/ga4.ts`, loaded `lazyOnload` | no-op |
 
 ## 10. Security, privacy and abuse
@@ -239,8 +237,7 @@ offers cron.
   `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_PUBLIC_BUCKET`,
   `R2_PRIVATE_BUCKET`, `R2_PUBLIC_HOST`, `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_EMAIL_TOKEN`,
   `EMAIL_FROM`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`,
-  `VENDERCRM_URL` (https://crm.clientes.com.py), `VENDERCRM_API_KEY`, `VENDERCRM_API_KEY_LAWYERS` (optional), `UPAY_PUBLIC_KEY`,
-  `UPAY_PRIVATE_KEY`, `INVOICING_API_KEY`, `CRON_SECRET`, `GA4_ID`, `ADS_ID`.
+  `VENDERCRM_URL` (https://crm.clientes.com.py), `VENDERCRM_API_KEY`, `VENDERCRM_API_KEY_LAWYERS` (optional), `CRON_SECRET`, `GA4_ID`, `ADS_ID`.
 
 ## 12. Front-end conventions
 

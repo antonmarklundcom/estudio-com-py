@@ -6,7 +6,7 @@
   - the SEO engine and redirects;
   - money and legal math, the verification engine;
   - the intake, AI, matching and SLA engines;
-  - billing, cron;
+  - manual billing periods, cron;
   - the contracts every UI will call.
 - **Windows S1–S12 (Sonnet 5.5)** then build every page, every piece of content, and every
   panel and admin screen on top of those engines. Several run in parallel.
@@ -56,7 +56,7 @@ Subagents spawned inside W1 for mechanical parts must set `model: "sonnet"` expl
    - `higgsfield-image-pipeline` → `webimg-pipeline` (S5);
    - `budgeted-runner-deploy` (anything under `.github/` or hooks);
    - `security-review` (S12).
-10. **Secrets:** API keys (VenderCRM, uPay, Anthropic, Cloudflare) go in hPanel env vars only.
+10. **Secrets:** API keys (VenderCRM, Anthropic, Cloudflare) go in hPanel env vars only.
     Never write a real key into the repo, a prompt file, a log or a PR body.
 
 ## 1. W1 — the Opus window
@@ -200,23 +200,22 @@ has ≥ 10 hand-computed test cases. They ship behind the `TOOLS_LIVE` flag unti
 - The 4th submission from the same phone in a day is refused.
 - The AI filter suite finds 0 forbidden patterns.
 
-### M7 — billing engine (P4)
+### M7 — manual billing engine (P4)
 
-- The subscription state machine: Profesional monthly/annual, Fundador annual 600k locked
-  (cap 50), trial/founder-free until the first invoice, and `past_due` → routing off after a
-  7-day grace period.
-- uPay adapter: link creation, webhook signature check, idempotency on `provider_ref`, reconcile
-  job. Built against the sandbox, or mocked until you have keys.
-- Bank-transfer reference `EST-<id>-<YYYYMM>` with an admin-confirm action.
-- Invoicing adapter: the provider API from question 7, else `pending` + manual.
-- Sponsored slot purchase logic (1 per page, indexable pages only).
+Billing is manual (decided: no gateway, no auto-debit; `04` §6). The engine is small:
+- `billing/periods.ts`: statuses `founder_free → active → grace → lapsed` driven by `paid_until`;
+  a 7-day grace period, then routing off; the Fundador price (600k/year, cap 50) locked per
+  lawyer; founders verified before billing starts stay `founder_free` until you set a first date.
+- `billing/confirm.ts`: the admin-confirm action (payment row `reported → confirmed`, extends
+  `paid_until` by the plan period, audit row). Also reject, with a reason.
+- Reminder emails at −7 d and −1 d (cron job), and sponsored-slot periods on the same mechanism
+  (1 per page, indexable pages only).
 
-**Acceptance:**
-- In the sandbox (or mocked), a payment webhook activates the subscription, and the lawyer
-  becomes eligible in `matching`.
-- The same webhook replayed 3× gives one payment and one invoice.
-- A founder renewal is charged at 600k and not at list price.
-- `past_due` removes routing on day 8.
+**Acceptance (fake clock):**
+- Confirming a yearly payment sets `paid_until` +1 year, and the lawyer is eligible in `matching`.
+- At `paid_until` + 8 days routing is off; the profile is still public.
+- A founder's next confirmation is priced 600k, not the list price.
+- Confirming the same payment twice changes nothing the second time.
 
 ### M8 — handoff to Sonnet
 
@@ -235,7 +234,11 @@ has ≥ 10 hand-computed test cases. They ship behind the `TOOLS_LIVE` flag unti
   VenderCRM list);
 - run `db:migrate` and the seeds on production.
 
-Nothing else blocks W1: R2, Turnstile, Anthropic and uPay all have mocked or degraded modes.
+Nothing else blocks W1: R2, Turnstile and Anthropic all have mocked or degraded modes.
+
+**Database in a cloud window:** if W1 runs as a Claude Code cloud session, it installs MySQL 8 (or
+MariaDB) inside its own container for `estudio_dev` and the tests; production is only touched by
+you.
 
 ## 2. The Sonnet 5.5 windows
 
@@ -254,14 +257,14 @@ write application code (S1, S6–S12).
 | **S8 Client intake UI** | `content/intake/**` (13 sets), `src/app/(public)/consulta/**`, `src/app/(public)/mi-consulta/**` | 13 question sets (fan-out); 5-step stepper (localStorage, live-supply line, 44 px targets, penal "detenido ahora" notice); result page + send; `/mi-consulta/` (status, "pedir otro", "eliminar mis datos") | E2E Laboral/Luque: summary shown → 3 lawyers → send → "aceptada" after a lawyer accepts; delete-my-data nulls PII |
 | **S9 Lawyer inbox** | `src/app/(lawyer)/panel/casos/**`, PWA manifest + service worker, `src/app/(public)/resena/**`, `src/app/admin/resenas/**`, `src/lib/notify/templates/**` | Inbox, accept/decline, contact reveal, "contactado", report; push opt-in screen; review form + moderation + lawyer reply; all email template texts | E2E: push subscription saved; accept → contact shown; review submitted → moderated → published |
 | **S10 Admin ops** | `src/app/admin/casos/**`, `src/app/admin/reportes/**`, `src/app/admin/embudo/**` | Cases (PII view audited), triage, SLA monitor, bad-lead reports, demand report, funnel table (§5) | Admin views work on seeded data; every PII view writes an audit row |
-| **S11 Billing UI** | `src/app/(lawyer)/panel/plan/**`, `src/app/admin/pagos/**`, `src/app/(public)/para-abogados/planes/**`, sponsored card component | Plans page (150k / 1.5M / Fundador 600k per year / sponsored 150k), checkout, transfer flow, admin payments + revenue, sponsored card labelled "Patrocinado" outside the ranked list | Sandbox or mocked payment activates the plan; the sponsored card is absent from the shortlist JSON |
+| **S11 Billing UI** | `src/app/(lawyer)/panel/plan/**`, `src/app/admin/pagos/**`, `src/app/(public)/para-abogados/planes/**`, sponsored card component | Plans page (150k / 1.5M / Fundador 600k per year / sponsored 150k); panel "Cómo pagar" (bank details from settings, reference code, optional hand-made payment link, "Ya pagué" + receipt upload); admin Pagos (confirm/reject, invoice number, paid-until list, revenue); sponsored card labelled "Patrocinado" outside the ranked list | E2E: lawyer reports a payment → admin confirms → plan active and paid-until shown; the sponsored card is absent from the shortlist JSON |
 | **S12 Launch** | security fixes anywhere (listed in the log), `scripts/backup-db.ts`, `docs/ops/**`, `docs/launch/**` | `security-review` skill + fixes; headers checked with `curl -I`; weekly encrypted dump → R2 + a **restore test**; breach runbook, verification-call script, admin routine; project skill `estudio-dev`; Ads structure and outreach templates; delete `legacy-php/` 30 days after cutover | Restore into `estudio_dev` succeeds; security findings fixed or logged with reasons; launch checklist below is green |
 
 **Launch checklist (S12, on production):**
 - a real verified test lawyer completes intake → accept → review;
 - Lighthouse passes;
 - the legal pages are reviewed (or the interim pages you approved, question 5);
-- a real Gs 150.000 payment and a bank transfer both succeed and are refunded;
+- one real bank transfer is reported, confirmed and reflected in `paid_until`;
 - the demand report works.
 
 ## 3. Order and parallelism
@@ -298,7 +301,7 @@ W1 (Opus: M1 → M8)
 | S6 | Cloudflare DNS move; GA4 + Search Console; interim or reviewed legal pages (questions 4, 5) |
 | S7 | R2 buckets + token; Cloudflare Email Sending for the domain; the verification operator; scan one matrícula-digital QR; CSJ dataset download |
 | S8–S10 | Anthropic API key; deploy the cron Worker (`wrangler`, README); VAPID keys (the script prints them); ask Cloudflare for a higher email quota |
-| S11 | Entity decision (question 6); uPay merchant account + keys; SIFEN + invoicing provider (question 7); accountant |
+| S11 | Entity + bank account for payments (question 6); bank details in admin settings; your invoicing tool; accountant |
 | S12 | Legal sign-off; outreach via the Leads DB (No Molestar checked); Ads budget; paid guide review |
 
 ## 5. Funnel events (`funnel_events`; GA4 mirrors the starred ones as conversions)

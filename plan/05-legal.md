@@ -132,6 +132,10 @@ in `10-risks-and-open-questions.md`).
   DPAs where offered. Under 7593 a transfer mechanism is needed. ⚖ Confirm what suffices.
 - **Breach runbook** (in P5): contain → assess → notify affected users and, from when the ANPDP
   exists, the agency within 72 h.
+- **Phones on public pages:** a lawyer's WhatsApp/mobile appears only after they tick "mostrar
+  mi WhatsApp", stored as a `consents` row (`lawyer_public_phone`, text version, date) and
+  withdrawable from the panel at any time. Consent is a valid legal basis, so a personal mobile
+  is fine to publish *when the person approved it* and the approval is recorded.
 - **Lawyers are data subjects too:** CSJ roll data is used only to verify a lawyer who signed up.
   We never publish unclaimed profiles built from the dataset (`08-data.md`).
 

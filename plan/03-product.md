@@ -147,7 +147,8 @@ self-declared and labelled "declarado"), office address (optional, shown only if
 consultation, computed from the current jornal mínimo) · *"A convenir en la primera consulta"*;
 plus an optional "cómo cobro" note ≤ 300 chars. Self-declared and labelled as such. **No "consulta
 gratis" option** — a fee below the arancel is void and a waiver risk (`05-legal.md` §2),
-working hours, WhatsApp number (public or hidden), website, verification badge + date, reviews.
+working hours, WhatsApp number (hidden unless the lawyer ticks "mostrar mi WhatsApp" — that tick
+is stored as consent), website, verification badge + date, reviews.
 Private: cédula, documents, billing data (RUC/razón social for the invoice), notification settings,
 vacation mode.
 Slug: `/abogado/<nombre-apellido>` (+ `-2` on collision). Name changes are admin-approved.
@@ -200,8 +201,11 @@ never edited by us, never deleted for being negative, never bought, never import
 the count and average only from ≥ 3 published reviews.
 
 ### 4.7 Plans & billing (details in `04-business-model.md`)
-Plan page, this month's cases (offered / accepted / fair-use cap), invoices, payment method (uPay
-subscription link / bank transfer reference), cancel anytime (effective end of period). **No
+Plan page, this month's cases (offered / accepted / fair-use cap), **paid until** date, how to pay
+(bank transfer details and a reference code `EST-<id>-<periodo>`, or a payment link you created by
+hand), a "Ya pagué" button (optional receipt upload), invoices you issued. **Billing is manual**:
+no card on file, no auto-debit. Email reminders 7 days and 1 day before the paid-until date; after
+a 7-day grace period routing turns off until you confirm the next payment. **No
 per-case price anywhere**: cases are included in the subscription, never sold one by one
 (`05-legal.md` §1).
 
@@ -263,7 +267,7 @@ or fake, and misclassification feeds the triage review. If per-case pricing is e
 Verification queue (documents, checklist, CSJ source field, approve/reject with reason) · Lawyers
 (status, plan, pause, notes) · Cases (all, with triage queue for `otro`/low confidence; PII visible
 only here, every view audited) · Assignments & SLA monitor · Bad-lead reports · Reviews moderation
-· Payments & invoices (mark bank transfer paid, uPay reconciliation) · Revenue (MRR, paid
+· Payments (confirm a transfer → set paid-until +1 month / +1 year; record the invoice number you issued) · Revenue (MRR, paid
 lawyers, churn) · Demand report (cases by specialty × city, covered/uncovered) · Abuse reports
 (from lawyers and clients; block phone/IP) · Taxonomy & settings (SLA hours, fair-use cap, max lawyers
 per case, holidays) · Audit log viewer.
