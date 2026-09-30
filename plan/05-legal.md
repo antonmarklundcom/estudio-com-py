@@ -1,206 +1,215 @@
-# 05 — Legal and ethics (hard constraints)
+# 05 — Legal protection (highest priority)
 
-**I am not a lawyer.** Primary legal texts could not be opened from this environment; the findings
-come from search extracts of official URLs (bacn.gov.py, csj.gov.py, colegiodeabogados.org.py)
-and commentary. Each item says how sure it is and what **a Paraguayan lawyer must confirm (⚖)**
-before launch. The rules in the "Build rule" lines are binding on builders regardless.
+**I am not a lawyer, and this is not legal advice.** The primary legal texts couldn't be opened
+from this environment, so the findings come from search extracts of official sources. Items
+marked ⚖ go to the one-off lawyer consultation in §10 before paid ads or partner fees start.
 
-## 1. Lawyer advertising, solicitation, paid lead generation
+## 1. What you are, and what you never say
 
-**Findings.**
-- There is no statutory lawyer ethics code. The *Código de Ética Profesional* of the Colegio de
-  Abogados del Paraguay binds its members (membership is voluntary, Constitution art. 42).
-  - **Art. 8, "Formación de clientela":** avoid direct or indirect solicitation of clients. Avoid
-    "suspicious or excessive" advertising and **"la mediación de agentes o corredores"**. Ads
-    should be limited to title, specialties, office and hours, in sober text.
-  - **Art. 28:** fees may be shared only among lawyers (and procuradores) who did common work.
-- The CSJ (Consejo de Superintendencia) disciplines lawyers and controls the matrícula.
-- No Código de Organización Judicial (COJ, Ley 879/81) article on advertising was found.
-- Confidence: medium on the article wording, low on how it applies to platforms. No case law was
-  found.
+**You are a marketing and contact service:** *"estudio.com.py le pone en contacto con abogados
+independientes matriculados."* You are not a law firm and you don't give legal advice. You are
+never a party to the relationship between the client and the lawyer.
 
-**What that means for us.**
-- A flat subscription for a listing and a software tool is the lowest-risk model. It is
-  comparable to paid advertising.
-- Per-lead or commission pricing is the main risk, because it can be read as a paid "corredor"
-  or as fee-sharing.
-- Ranking by payment could be read as "publicidad excesiva".
-- The risk falls mostly on the lawyers, and is reputational. It is still our risk too: lawyers
-  won't join a platform that exposes them.
+| Allowed (use these) | Never (a check in `verify.sh` fails the build) |
+|---|---|
+| "Le ponemos en contacto con un abogado independiente" | "nuestros abogados", "nuestro estudio", "somos abogados", "nuestro equipo legal" |
+| "Abogado asociado: Abg. <nombre>, matrícula N° <n>" (only when true) | "asesoramiento legal", "asesoría jurídica", "le asesoramos", "consulta legal gratis" |
+| "Información general, no es asesoramiento legal" | "gratis", "sin costo" about a lawyer's service |
+| "El abogado le informa sus honorarios antes de empezar" | "garantizado", "ganamos", "100 %", "el mejor", "especialistas certificados" |
+| "Usted no paga nada a estudio.com.py" | any number of lawyers, cases, years or reviews that isn't literally true |
 
-**Build rules.**
-- No per-lead price, commission, success fee or any share of a lawyer's fee (`04` §1).
-- The organic ranking never uses the plan tier (`03` §5.2).
-- Sponsored cards are labelled "Patrocinado" and sit outside the ranked list.
-- Profile copy is sober. The profile form blocks superlatives ("el mejor", "100 % casos ganados",
-  "garantizado") with a wordlist check. Specialties are "áreas de práctica declaradas", not
-  certified specialisations.
-- The platform never contacts a client on a lawyer's behalf. The client chooses whom to send
-  the case to (`03` §5.3).
+**Site-wide:**
+- The header tagline is **"Contacto con abogados independientes"**.
+- The footer disclaimer, on every page: *"estudio.com.py es un servicio de contacto con abogados
+  independientes. No es un estudio jurídico ni presta asesoramiento legal. La relación
+  profesional y los honorarios se acuerdan directamente entre usted y el abogado."*
+- JSON-LD is `Organization`, never `LegalService` or `Attorney`.
 
-⚖ Confirm:
-- whether the included-cases subscription is compatible with arts. 8 and 28;
-- whether a sponsored slot is acceptable;
-- whether an updated Colegio code or a CSJ acordada on publicity exists;
-- what the lawyer-facing terms should say.
+The PHP site already follows most of this (`/plan.md` §1.1). The build adds the enforced check.
 
-## 2. Fees: Ley 1376/88 (arancel)
+**Why it protects you:** representation in court is reserved to matriculated lawyers (COJ Ley
+879/81 arts. 87–91). Out-of-court "advice" isn't clearly reserved, but claiming to be a firm or
+to advise is where the risk sits:
+- misleading advertising (Ley 1334/98 covers the *advertising* of professional services);
+- possible complaints from lawyers or the CSJ.
 
-**Findings (high confidence on the core rule).**
-- The arancel applies when there is no written fee contract.
-- A **fee agreement below the arancel, or a prior waiver, is void**.
-- Cuota litis is allowed up to 45 % of the net result, but not in alimentos or labour cases
-  (medium confidence).
-- Consultations are priced in jornales: a verbal consultation is at least 5 jornales/hour
-  (about Gs 585k at Gs 117,077 per jornal).
+The brand word "estudio" reads like "estudio jurídico". The tagline and disclaimer are the
+counterweight. ⚖ Ask whether they are enough.
 
-**Build rules.**
-- No "consulta gratis" option anywhere: not on profiles, not in ads, not in our copy.
-- A lawyer's "desde Gs X" for a consultation is validated to be ≥ the arancel minimum, computed
-  from the `settings.jornal_minimo` value.
-- The platform publishes arancel minimums only as tables reviewed by a lawyer, and labels them
-  "mínimo legal según Ley 1376/88; el honorario final lo acuerda con su abogado".
-- Our copy never says or implies that a lawyer on the site charges less than the law allows.
+## 2. Promoting before you have a lawyer
 
-⚖ Confirm:
-- the exact articles and the jornal count per act for the tables in `07-seo.md` §5;
-- whether "consulta inicial sin cargo" breaches art. 1 (we assume it does);
-- whether we may publish lawyers' declared ranges at all.
+**It's allowed if every promise is one you can keep today.** So the rules below apply until the
+first partner signs (they are also the safe default after).
 
-## 3. Unauthorized practice and the AI intake
+- **The form promise is only what *you* do:** *"Le respondemos en 1 día hábil. Si tenemos un
+  abogado independiente para su caso, se lo presentamos (nombre y matrícula) y usted decide si
+  quiere que le pasemos sus datos. Si no, se lo decimos y borramos su consulta."*
+- **Don't** say "un abogado le llamará", show a "respuesta en X horas" by a lawyer, or show
+  fake or placeholder lawyer cards. The honest empty state stays until a real partner exists.
+- **The client's data goes to a lawyer only after the client says yes to that named lawyer**
+  (two-step consent, §4). This is the single most protective rule: you never hand someone's
+  case to a person they didn't choose.
+- **No paid ads for an área you can't serve.** SEO traffic is fine; the form's promise is honest
+  either way. Ads create volume you would have to turn away.
+- A case you can't place gets a reply within 1 business day. The general reply names the public
+  defender (Ministerio de la Defensa Pública) for people without means; that wording is
+  owner-verified before it goes live. The lead is then deleted from VenderCRM within 30 days.
 
-**Findings (low confidence).**
-- Representation in court is reserved to matriculated abogados and procuradores (COJ arts. 87–91).
-- No statute was found that reserves out-of-court "orientación" to lawyers.
-- Risk rises if the AI advises, predicts, drafts filings, or if the site looks like a law firm.
-- **The brand "estudio" reads like "estudio jurídico".** That is a misleading-advertising risk
-  under Ley 1334/98 and a trust risk.
+## 3. Working with 1–3 partner lawyers
 
-**Build rules.**
-- The AI only summarises facts (`03` §3.3, `06` §6).
-- The disclaimer appears on the intake, on the result page and in the footer: *"estudio.com.py
-  es un directorio de abogados independientes. No es un estudio jurídico y no presta
-  asesoramiento legal. La relación profesional es entre usted y el abogado que elija."*
-- The header tagline always carries "Directorio de abogados verificados".
-- JSON-LD for the platform is `Organization`, never `LegalService`.
+**How you get paid (lowest risk first):**
 
-⚖ Confirm whether the name "estudio.com.py" needs more than the tagline + disclaimer (question 2
-in `10-risks-and-open-questions.md`).
+1. **Flat monthly marketing fee** per partner, fixed in advance and unrelated to any client or
+   case. It works like paid advertising. **Recommended.**
+2. Area exclusivity as part of that flat fee ("the only lawyer shown for familia"). Fine, if the
+   site says who the lawyer is.
+3. ~~Pay per lead / per case~~: **no.** The Colegio ethics code art. 8 tells lawyers to avoid
+   "la mediación de agentes o corredores". A per-lead price makes you look like that broker.
+4. ~~A percentage of the lawyer's fees, success fees~~: **never.** Art. 28 allows fee-sharing only
+   between lawyers. Doing it exposes the lawyer, and your agreement could be void.
 
-## 4. Personal data
+The ethics code binds lawyers who are Colegio members, not you. But a partner who gets in trouble
+is your problem too, and a clean model is what makes a good lawyer say yes.
 
-**Findings.**
-- **Ley 6534/2020** covers credit data only. It repealed 1682/01 and 1969/02.
-- **Ley 7593/2025** (general data protection) was promulgated on 2025-11-27 with a 2-year
-  *vacatio legis*, so it applies fully around **late November 2027**. The data agency (ANPDP) is
-  being set up in 2026. The main points, all medium confidence:
-  - legal bases: consent, contract, legitimate interest and others;
-  - consent must be prior, free, informed and unequivocal, and revocable;
-  - sensitive data includes health, sexual life and biometrics; criminal data is left to special
-    regulation;
-  - rights: access, rectification, deletion, objection, portability, restriction; about 30 days
-    to answer;
-  - safeguards on automated decisions;
-  - international transfer only with adequacy or safeguards;
-  - breach notice within 72 h;
-  - fines up to 10,000 jornales.
-- Constitution art. 33 (privacy) and art. 135 (habeas data) apply now.
+**A written agreement with each partner.** The outline for their lawyer to finalise is in
+`docs/partner-agreement-outline.md`, drafted in the build. It covers:
+- the services: website marketing and forwarding contact requests the client authorised;
+- the flat fee and the term;
+- the lawyer's independence: they alone advise, set fees (within Ley 1376/88) and answer for
+  their professional work;
+- no fee-sharing, commission or per-case payment;
+- the lawyer keeps their matrícula active and tells you at once about any suspension;
+- the lawyer approves how they're presented (name, photo, text);
+- data: each side is responsible for the data it holds, confidentiality, deletion when a client
+  asks, and no reuse of clients for other purposes;
+- the lawyer indemnifies you for their professional acts;
+- 30-day termination, and the lawyer's name comes off the site immediately at the end.
 
-**Build rules. We build to Ley 7593 from day one; it is cheaper than retrofitting.**
-- **Treat every case description as sensitive.** It routinely contains health, family, sexual
-  or criminal facts. That means:
-  - explicit consent to share it with the chosen lawyers (`03` §3.6);
-  - encryption at rest (`06` §4);
-  - redaction of identifiers before AI processing;
-  - no case text in VenderCRM, analytics, logs or error trackers.
-- **What we store about clients:** name, phone, optional email, city, situation, answers, free
-  text, the AI summary, consents, assignment events and hashed IP. Nothing else. No cédula, no
-  documents in v1.
+**Check each partner yourself before publishing them:**
+- identity (cédula);
+- matrícula, with current status from the CSJ *matrícula digital* QR or a CSJ constancia less
+  than 90 days old;
+- a video call.
+
+Keep a dated note of the check; with 1–3 lawyers this takes minutes. Re-check yearly. Show "Abg.
+<nombre>, matrícula N° <n>" on the site, and never a "verificado" badge implying a process
+beyond what you did.
+
+**Disclose it:** a page `/como-trabajamos/` says in plain words:
+- the partner lawyers pay estudio.com.py a fixed monthly fee for publicity;
+- estudio.com.py doesn't charge the client or take any part of the lawyer's fees;
+- the client chooses whether to contact the lawyer.
+
+Transparency is your best defence against a "misleading advertising" or "captación" complaint.
+
+## 4. Client data (Ley 7593/2025 applies fully from about November 2027; build to it now)
+
+- **Collect the minimum:** name, phone, city, área (chips), and an optional short note (≤ 500
+  characters) with the hint *"No incluya datos sensibles, números de documento ni datos de otras
+  personas; el abogado se los pedirá si hacen falta."* No uploads.
+- **Consent, step 1** (form checkbox, required, not pre-ticked): *"Acepto la Política de
+  Privacidad y autorizo a estudio.com.py a contactarme por teléfono, WhatsApp o email sobre esta
+  consulta."* The text version is sent with the lead as a field.
+- **Consent, step 2** (per lawyer, before sharing): you message the client *"Le presentamos al
+  Abg. X, matrícula N° Y, que atiende casos de Z. ¿Autoriza que le pasemos su nombre, teléfono y
+  consulta?"* You forward only after a "sí" and note the date in VenderCRM. That note is your
+  proof of consent.
+- **Where the data lives:** VenderCRM (your CRM) and the lawyer. Nowhere else: no case text in
+  analytics or logs. `enviar.php` already logs only a degraded-mode line; the build checks that
+  it doesn't log the message text.
 - **Retention:**
-  - unaccepted cases: 180 days;
-  - accepted cases: 24 months;
-  - verification images: 90 days after the decision;
-  - lawyer accounts: while active + 5 years for invoices (tax law);
-  - after that, PII is purged by cron and anonymised stats are kept.
-- **Rights:**
-  - "Eliminar mis datos" on `/mi-consulta/`;
-  - a rights request form on `/privacidad/` with a 15-day internal target (under the reported
-    30-day legal limit);
-  - human review available for any automated routing outcome ("Pedir revisión" → admin).
-- **International transfers:** list the processors and countries in the privacy policy
-  (Hostinger, Cloudflare, Anthropic, uPay, VenderCRM, Google Analytics) and get
-  DPAs where offered. Under 7593 a transfer mechanism is needed. ⚖ Confirm what suffices.
-- **Breach runbook** (in P5): contain → assess → notify affected users and, from when the ANPDP
-  exists, the agency within 72 h.
-- **Phones on public pages:** a lawyer's WhatsApp/mobile appears only after they tick "mostrar
-  mi WhatsApp", stored as a `consents` row (`lawyer_public_phone`, text version, date) and
-  withdrawable from the panel at any time. Consent is a valid legal basis, so a personal mobile
-  is fine to publish *when the person approved it* and the approval is recorded.
-- **Lawyers are data subjects too:** CSJ roll data is used only to verify a lawyer who signed up.
-  We never publish unclaimed profiles built from the dataset (`08-data.md`).
+  - not placed: deleted within 30 days;
+  - placed: deleted 12 months after forwarding;
+  - on request: deleted within 15 days.
+  A reminder routine in VenderCRM or your calendar does the monthly clean-up.
+- **The privacy policy** says:
+  - who you are (see §6);
+  - what you collect, why, and the two-step sharing;
+  - the processors: Hostinger, Cloudflare, VenderCRM, Google Analytics if used;
+  - the retention periods above;
+  - how to ask for access, correction or deletion (contact form or email);
+  - that consent can be withdrawn at any time.
+- **Sensitive by nature:** a legal problem often implies health, family, sexual or criminal
+  facts. That is why the note is short, optional and warned against, and why sharing needs the
+  second consent.
 
-⚖ Confirm:
-- 7593 obligations that apply before November 2027 (if any);
-- how criminal-matter intakes must be handled;
-- the retention periods;
-- the transfer mechanism;
-- whether the controller must register with the ANPDP.
+## 5. Content (guides, fee pages, calculators)
 
-## 5. Consumer and e-commerce law
+- Every guide is general information, dated, with "No es asesoramiento legal; consulte con un
+  abogado", and it ends with the contact form.
+- There are no case predictions, no amounts "que le corresponden", and no deadlines unless a
+  public rule states them (named generically: "la ley fija un plazo; el abogado se lo confirma").
+- Fee pages publish **only the arancel minimums (Ley 1376/88)**, labelled "mínimo legal según Ley
+  1376/88; el honorario final lo acuerda con el abogado". A fee below the arancel is void, so
+  never "gratis". The tables are reviewed by a lawyer before publishing (a partner can do it; the
+  byline says so only if true).
+- The calculators (fee minimums, severance) say "orientativo" and ship behind a flag until
+  reviewed.
+- There is no invented social proof: no testimonials, counts or ratings unless real and
+  documented.
 
-**Findings (medium-high confidence).**
-- **Ley 4868/13 art. 7:** the site must permanently show:
-  - legal name, address, owners, email and phone;
-  - the privacy policy;
-  - an electronic copy of the contract.
-- **Art. 23:** commercial electronic messages must be labelled as such, with an opt-out, and use
-  lawfully obtained data.
-- **Ley 1334/98:** liberal professions are excluded, but the **advertising** that offers them is
-  covered. Our service to clients is covered by it.
+## 6. Your own exposure (the structural protections)
 
-**Build rules.**
-- **Your decision: no RUC on the site for now.** Art. 7 (as reported) lists legal name, address,
-  owners, email and phone; RUC is not in the list. Until payments go live the footer and
-  `/contacto/` show the brand, an email address and the contact form. ⚖ Before P4 (when we start
-  charging lawyers) the lawyer confirms the minimum identity a site that *sells* must show. The
-  RUC then appears on the invoices sent to lawyers, not on public pages.
-- The terms (clients) and the lawyer terms (B2B) are versioned MDX files, and the version hash
-  is stored with each acceptance.
-- Every promotional message has an opt-out line.
+1. **Operate through a company, not personally:** an EAS (online, about 72 h) or your existing
+   company, before you invoice a partner or run ads. The company, not you, signs the partner
+   agreements and appears in the privacy policy as the data controller.
+2. **Site identity:** your decision is no RUC on the site. The footer shows the brand, an email
+   and the contact form. ⚖ Ask what minimum identity Ley 4868 art. 7 requires for a free
+   contact service. The same rule covers the company name as data controller.
+3. **The terms** (`/terminos/`) say:
+   - it is an information and contact service;
+   - no lawyer-client relationship with estudio.com.py;
+   - no guarantee of result, availability or response by any lawyer;
+   - no liability for the lawyer's professional acts;
+   - the guides are general information;
+   - Paraguayan law, Asunción courts.
+4. **Keep records:**
+   - the partner check notes;
+   - signed partner agreements;
+   - consent notes in VenderCRM;
+   - deletion log;
+   - the versions of terms and privacy (git history is enough).
+5. **Taxes:** the flat fee is a service with IVA 10 %. Invoice it through your company (SIFEN) and
+   ask your accountant.
 
-## 6. Reviews, badges, claims (our own rules; no Paraguayan rule found beyond misleading advertising)
+## 7. Outreach, when you look for partner lawyers
 
-- Reviews come only from verified, accepted assignments (`03` §4.6). None are fake, bought,
-  seeded, incentivised with money, or imported. Negative reviews are never removed for being
-  negative.
-- "Verificado" means exactly the four checks in `03` §4.3. The badge carries its date and links
-  to `/como-verificamos/`. A check we don't perform is never claimed: no "especialista
-  certificado", no "sin antecedentes".
-- No guarantee of outcome, response, or price anywhere. The SLA copy promises a *process*
-  (reassignment), not a result.
-- Sponsored placement is always labelled.
-- No scraped private data. No contacting people from scraped lists without a lawful basis
-  (`08-data.md` §3). The *No Molestar* registry (Ley 5839/2017, SEDECO) is checked before any
-  WhatsApp or call outreach.
+With 1–3 partners you don't need lists or scraping: use your network, referrals from
+contador.com.py contacts, and 1:1 messages to firms that publish their business contact.
 
-## 7. Facts to verify before they go live (owner + lawyer)
+For any WhatsApp or call to a number:
+- check it against SEDECO's *No Molestar* registry (Ley 5839/2017);
+- say who you are;
+- stop if they say no.
+Commercial emails are labelled as such and include an opt-out (Ley 4868 art. 23).
 
-- The public-defender (Ministerio de la Defensa Pública) contact shown to "detenido ahora"
-  intakes.
-- The jornal mínimo value and the arancel tables.
-- Jurisdiction facts in the 25 local blocks (carried over from `legacy-php/docs/facts-to-verify.md`
-  and extended).
-- The QR matrícula-digital verification procedure (`01-competitors.md`, manual check 3).
+## 8. Your other directory sites (asked 2026-09-30)
 
-## 8. Pages to write (P1, reviewed by a lawyer before cutover)
+These are the same principles, stated generally. ⚖ Include them in the §10 consultation.
+- Publish only business contact data the business published itself.
+- A personal mobile goes public only with that person's recorded approval.
+- Offer a "reclamar / eliminar esta ficha" route, and act on removals fast.
+- Have a privacy page naming the data source.
+- Never scrape a site whose terms or robots.txt forbid it, and never get around bot protection.
+- These obligations tighten when Ley 7593 applies in full (around late 2027).
 
-`/terminos/` (clients), `/para-abogados/terminos/` (lawyers: verification, routing rules, SLA,
-pause, plans, cancellation, no commission, conduct), `/privacidad/` (per §4), `/como-verificamos/`,
-`/como-funciona/` (the ranking formula in plain words, sponsored labelling), cookie notice (GA4
-consent, off until accepted).
+## 9. Research findings behind this file
 
-## 9. Taxes (for the accountant)
+The article-level findings and sources (Colegio code arts. 8/28, Ley 1376 art. 1, COJ, Ley 7593,
+Ley 4868, Ley 1334, Ley 5839) are in `later-marketplace/05-legal.md` §1–§7. They apply here
+unchanged.
 
-The selling entity charges IVA 10 % on subscriptions and sponsored slots, owes IRE, and must issue
-SIFEN e-invoices. Whether a new RUC must e-invoice from day one is a DNIT/accountant question. Foreign
-SaaS costs (Anthropic, Meta, Cloudflare) carry IVA through card perception.
+## 10. One-off lawyer consultation: about 1–2 hours, before ads or partner fees
+
+Take this list to an independent Paraguayan lawyer (not your partner, to avoid the conflict of
+interest):
+1. Is a flat monthly marketing fee from partner lawyers compatible with the Colegio code arts. 8
+   and 28? Is area exclusivity OK?
+2. Are the brand "estudio.com.py", the tagline and the disclaimer enough to avoid misleading
+   advertising?
+3. Is the two-step consent (§4) sufficient under Ley 7593 and the Constitution (art. 135)? Are
+   the retention periods reasonable?
+4. What minimum site identity is required (Ley 4868 art. 7) if no RUC is shown?
+5. Review `/terminos/`, `/privacidad/`, `/como-trabajamos/` and the partner agreement outline.
+6. Are the arancel fee tables correct, and do they need a disclaimer beyond §5?
+7. Your other directory sites (§8): what to change before 2027.
