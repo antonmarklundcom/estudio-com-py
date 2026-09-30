@@ -12,7 +12,7 @@ environment. Figures marked (!) need a check before they appear in public copy.
 - The Colegio de Abogados has only about 1,100 members. There is no mandatory bar, so no body
   holds a complete, current list we can use.
 - **What this means:** supply is abundant and fragmented, and most lawyers are solo
-  practitioners with no web presence. A Gs 150k/month tool that brings clients is an easy offer
+  practitioners with no web presence. A flat-fee partnership that brings clients is an easy offer
   to explain. The hard part is reaching lawyers and getting them verified, not persuading them.
 
 ## 2. Demand: clients
@@ -59,37 +59,25 @@ Each candidate scored 1–5 on **E** (edge vs buscaabogados), **C** (cost/risk t
 | e | Guaraní / English / Portuguese | 3 | 4 | 3 | 3 | Guaraní as a filter. EN/PT pay off only for foreigners, so it fits under f |
 | f | Business, company formation, tax + foreigners, cross-sold with contador.com.py | 4 | 4 | 3 | **5** | Higher-value clients, lawyers who pay more, and your own RUC/IVA/e-Kuatia cross-sell |
 
-### Recommendation
+### Recommendation (updated 2026-09-30 for the lean model)
 
-**Primary wedge: "Lo que cuesta y lo que viene" (a + d).** Every situation and specialty page
-answers three questions before asking for contact: what happens now, what it costs (the legal
-minimum by arancel, plus what the lawyers in this city declare), and who can take the case here.
-Tools reinforce it: *honorarios mínimos* and *liquidación por despido*. The trust layer rides on
-top: a dated, four-step verification that names its source.
+**Primary wedge (unchanged): "Lo que cuesta y lo que viene" (a + d).** Every page answers what
+happens now, what it costs by law (arancel minimums), and how to get a lawyer. Guides and two
+calculators do the work. This is content, so it fits the lean model perfectly: it needs no lawyer
+supply to rank.
 
-Why this wedge:
-- It wins organic search, which a newcomer needs because paid leads barely break even.
-- It attacks the client's biggest fear, which is cost.
-- It is hard to copy quickly: fee content needs legal review and upkeep, and templated
-  directories can't fake it.
+**Secondary (deferred): "Empresas y extranjeros" (f + e).** Build it only when a partner covers
+empresas/tributario (and speaks EN/PT for foreigners). The contador.com.py cross-link on the
+empresas/tributario pages can go in now.
 
-**Secondary wedge: "Empresas y extranjeros" (f + the useful part of e).** Company formation,
-partners, DNIT and residency, with EN/PT landing pages, lawyers who speak pt/en, and a partner
-link to contador.com.py.
-
-Why this wedge:
-- It is the fastest-growing demand: residency +63 % and EAS +28 %.
-- These lawyers can afford the plan.
-- It uses your existing business.
-
-**Kept as built-in mechanics, not as wedges:**
-- b: a good 5-step intake with an AI summary;
-- c: SLA and reassignment, advertised only in cells with density;
-- Guaraní: as a language filter.
+**Dropped for now:**
+- b (intake/matching) and c (response SLA) need a lawyer pool; they live in `later-marketplace/`;
+- a Guaraní filter needs lawyer profiles.
 
 ### What we do not do
 
-- Compete on the size of the lawyer count.
-- Rank lawyers by payment.
+- Present estudio.com.py as a firm or as giving advice.
+- Show lawyers who haven't signed.
+- Charge per lead.
 - Promise results.
 - Build pages on competitor brand names.

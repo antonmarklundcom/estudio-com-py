@@ -39,7 +39,7 @@ WhatsApp. We cannot beat it by copying those. We beat it on:
   calls itself the most complete digital guide of lawyers in Paraguay and uses a Hotmail contact.
 - Your figure of about 45 profiles is UNVERIFIED.
 - Treat it as a **small, weak competitor**. It is worth a manual look: a weak site on an exact-match
-  domain could be a future acquisition target (question 14 in `10-risks-and-open-questions.md`).
+  domain could be a future acquisition target (question 14 in `later-marketplace/10-risks-and-open-questions.md`).
 
 ## Others found
 
