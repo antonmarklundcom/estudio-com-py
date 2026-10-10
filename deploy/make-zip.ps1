@@ -37,7 +37,7 @@ if (Test-Path $Zip)   { Remove-Item -Force $Zip }
 New-Item -ItemType Directory -Force $Stage | Out-Null
 
 $Ship = @('index.php', '404.php', 'enviar.php', 'sitemap.php', 'robots.php', 'router.php',
-          '.htaccess', 'config.example.php', 'assets', 'content', 'lib', 'partials', 'templates')
+          '.htaccess', 'config.example.php', 'vendercrm.private.example.php', 'assets', 'content', 'lib', 'partials', 'templates')
 foreach ($item in $Ship) {
     $src = Join-Path $Root $item
     if (-not (Test-Path $src)) { throw "missing: $item" }

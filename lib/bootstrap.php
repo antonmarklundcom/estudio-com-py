@@ -21,6 +21,21 @@ define('ROOT_DIR', dirname(__DIR__));
  */
 function cfg(string $key, ?string $default = null): ?string
 {
+    // Canonical CRM setup is independent of deployment-local settings.
+    // ROOT_DIR is the verified source document root, never request input.
+    if ($key === 'VENDERCRM_URL' || $key === 'VENDERCRM_API_KEY') {
+        static $crmLoaded = false;
+        static $crm = null;
+        if (!$crmLoaded) {
+            require_once ROOT_DIR . '/lib/vendercrm-config.php';
+            $crm = \VenderCRM\Config::optional(ROOT_DIR);
+            $crmLoaded = true;
+        }
+        if ($crm !== null) {
+            return $key === 'VENDERCRM_URL' ? $crm->doctor()['url'] : $crm->apiKey();
+        }
+        // No canonical source: retain the existing legacy/inactive behavior.
+    }
     static $config = null;
 
     if ($config === null) {

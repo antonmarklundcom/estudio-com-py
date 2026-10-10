@@ -16,11 +16,9 @@ return [
     // the sitemap. Falls back to the request host when empty.
     'SITE_URL' => '',
 
-    // VenderCRM (Sitios → this site). Without both values the lead form runs in
-    // degraded mode: submissions are appended to logs/leads.log and the visitor
-    // still gets a success state pointing at WhatsApp.
-    'VENDERCRM_URL'     => '',
-    'VENDERCRM_API_KEY' => '',
+    // CRM credentials are separate: copy vendercrm.private.example.php to
+    // ../private/vendercrm.php outside the document/deployment root.
+    // Keep this file for unrelated site settings only.
 
     // Lead notification email through Resend (https://resend.com). Optional and
     // independent of VenderCRM: when both values are set, every accepted lead is

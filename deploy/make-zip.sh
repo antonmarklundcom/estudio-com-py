@@ -41,6 +41,7 @@ SHIP=(
   router.php
   .htaccess
   config.example.php
+  vendercrm.private.example.php
   assets
   content
   lib
