@@ -409,8 +409,15 @@ if ($fields !== []) {
 }
 
 // --- 7. Forward, or degrade gracefully --------------------------------------
-$crmUrl = cfg('VENDERCRM_URL');
-$apiKey = cfg('VENDERCRM_API_KEY');
+try {
+    $crmUrl = cfg('VENDERCRM_URL');
+    $apiKey = cfg('VENDERCRM_API_KEY');
+} catch (RuntimeException $error) {
+    // Preserve local storage and notifications when server settings are invalid.
+    error_log('VenderCRM server configuration is incomplete or invalid.');
+    $crmUrl = null;
+    $apiKey = null;
+}
 
 if ($crmUrl === null || $apiKey === null || !function_exists('curl_init')) {
     log_lead($payload, 'degraded:not-configured');

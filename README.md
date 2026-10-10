@@ -1,3 +1,30 @@
+
+## Persistent VenderCRM setup
+
+Requires PHP 7.4+. For new CRM setup use only `VENDERCRM_URL` and
+`VENDERCRM_API_KEY`. Copy `vendercrm.private.example.php` manually to
+`../private/vendercrm.php` relative to this site's document root, fill the two
+values once on the server, and restrict file permissions to the PHP account.
+The URL is an HTTPS origin such as `https://crm.example.com`, without an API
+route, query or fragment. Do not commit the resulting private file.
+
+Keep the sibling `private` directory outside both the document root and the
+folder replaced by deployments. Redeploy only the site folder; never overwrite
+or reset the private file. If the hosting layout differs, set
+`VENDERCRM_CONFIG_FILE` to an absolute file path physically outside the document
+root. Confirm the actual document root and deployed branch with the host first.
+Alternatively set both canonical variables in the PHP process environment;
+uploading a `.env` file alone does not populate PHP's environment.
+
+Canonical environment/private settings override old CRM values in `config.php`.
+When environment and private file both exist they must agree. Partial canonical
+pairs, conflicting canonical sources and unsafe paths fail without exposing keys.
+Without a canonical source, existing legacy CRM settings and the form's inactive
+behavior remain available. Other site settings continue using their existing loader.
+The helper never creates credentials, sends leads, or changes retry/recovery behavior.
+DNS names must be verified by the deployment owner to resolve to public addresses.
+
+Run `php tests/vendercrm-config.php` for offline synthetic configuration checks.
 # php-site-template
 
 A GitHub template for local-business sites — brochure pages, calculators, guides and a
@@ -246,12 +273,12 @@ place, so the repository keeps the readable source.
 5. Check `https://<domain>/`, `/sitemap.xml` and `/robots.txt`, then submit a test lead and
    confirm it reaches VenderCRM → **Contactos**.
 
-`config.php` values, all optional:
+Non-CRM `config.php` values, all optional (CRM uses the persistent setup above):
 
 | Key | Effect when empty |
 |---|---|
 | `SITE_URL` | canonical/OG URLs fall back to the request host |
-| `VENDERCRM_URL`, `VENDERCRM_API_KEY` | the lead form runs in degraded mode: submissions are appended to `logs/leads.log` and the visitor still gets a success state |
+| CRM setup | Use the persistent private file described above; absent CRM settings keep existing degraded behavior |
 | `RESEND_API_KEY`, `LEAD_NOTIFY_TO`, `LEAD_FROM` | no lead notification email |
 | `GA4_ID`, `ADS_ID` | `assets/js/analytics.js` is a silent no-op |
 
